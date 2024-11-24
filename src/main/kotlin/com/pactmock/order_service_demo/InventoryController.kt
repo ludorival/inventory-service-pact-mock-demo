@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable
 @RequestMapping("/inventory")
 class InventoryController {
 
-    val stockData = mutableMapOf<Long, Int>(1L to 50, 2L to 0, 3L to 20) // Exemple de données en mémoire
+    val stockData = mutableMapOf<Long, Int>(1L to 50, 2L to 0, 3L to 20) // Example of in-memory data
 
     @GetMapping("/product/{productId}")
     fun getProductStock(@PathVariable productId: Long): ResponseEntity<StockResponse> {
