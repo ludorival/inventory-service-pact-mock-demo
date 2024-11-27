@@ -4,13 +4,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.http.HttpStatus
 import org.junit.jupiter.api.Assertions.*
+import com.pactmock.inventory_service_demo.repository.InMemoryItemRepository
 
 class InventoryControllerTests {
     private lateinit var controller: InventoryController
 
     @BeforeEach
     fun setup() {
-        controller = InventoryController()
+        controller = InventoryController(InMemoryItemRepository())
     }
 
     @Test
