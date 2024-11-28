@@ -18,8 +18,8 @@ class InventoryController(private val itemRepository: ItemRepository) {
     fun bookItem(@RequestBody request: BookingRequest): ResponseEntity<BookingResponse> {
         val item = itemRepository.findById(request.itemId)
         return when {
-            item == null -> ResponseEntity.notFound().build()
-            item.stockCount < request.quantity -> ResponseEntity.status(409).body(BookingResponse(false, "Insufficient stock"))
+            item == null -> ResponseEntity.status(404).body(BookingResponse(false, "Item not found"))
+            item.stockCount < request.quantity -> ResponseEntity.ok(BookingResponse(false, "Out of stock"))
             else -> {
                 itemRepository.updateStock(request.itemId, item.stockCount - request.quantity)
                 ResponseEntity.ok(BookingResponse(true, "Successfully booked ${request.quantity} items"))
