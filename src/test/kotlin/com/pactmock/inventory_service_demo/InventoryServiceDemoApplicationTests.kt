@@ -51,13 +51,13 @@ class InventoryControllerTests {
     }
 
     @Test
-    fun `bookItem should return OK but success false when insufficient stock`() {
+    fun `bookItem should return 409 when insufficient stock`() {
         val request = BookingRequest(1L, 1000)
         val response = controller.bookItem(request)
 
-        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(HttpStatus.CONFLICT, response.statusCode)
         assertFalse(response.body?.success == true)
-        assertEquals("Out of stock", response.body?.message)
+        assertEquals("Insufficient stock", response.body?.message)
     }
 
     @Test
