@@ -22,13 +22,4 @@ class InMemoryItemRepository : ItemRepository {
         item.stockCount = quantity
         return true
     }
-    fun deleteAll() {
-        items.clear()
-    }
-
-    fun saveAll(newItems: List<Item>) {
-        newItems.forEach { item ->
-            items[item.id] = item
-        }
-    }
 } 
