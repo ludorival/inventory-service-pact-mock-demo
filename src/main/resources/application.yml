@@ -1,7 +1,7 @@
 server:
   port: 4000
   servlet:
-    context-path: /order-service
+    context-path: /inventory-service
 spring:
   application:
     name: inventory-service
