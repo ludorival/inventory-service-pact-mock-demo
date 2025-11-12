@@ -22,4 +22,13 @@ class InMemoryItemRepository : ItemRepository {
         item.stockCount = quantity
         return true
     }
+
+    override fun save(item: Item): Item {
+        items[item.id] = item
+        return item
+    }
+
+    override fun clear() {
+        items.clear()
+    }
 } 

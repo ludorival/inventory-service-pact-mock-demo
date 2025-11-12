@@ -5,3 +5,8 @@ server:
 spring:
   application:
     name: inventory-service
+
+pactbroker:
+  url: ${PACT_BROKER_URL:}
+  auth:
+    token: ${PACT_BROKER_TOKEN:}

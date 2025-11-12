@@ -5,6 +5,24 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      pact_url:
+        description: 'URL of the pact to verify (optional)'
+        required: false
+        default: ''
+      consumer_version_tags:
+        description: 'Consumer version tags (optional)'
+        required: false
+        default: ''
+      consumer_version_number:
+        description: 'Consumer version number (optional)'
+        required: false
+        default: ''
+      provider_version_tags:
+        description: 'Provider version tags (optional)'
+        required: false
+        default: ''
 
 permissions:
   checks: write
@@ -25,6 +43,9 @@ jobs:
         cache: maven
     
     - name: Build with Maven
+      env:
+        PACT_BROKER_URL: ${{ secrets.PACT_BROKER_URL }}
+        PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
       run: ./mvnw clean verify
     
     - name: Test Report
@@ -32,6 +53,39 @@ jobs:
       if: success() || failure()
       with:
         name: JUnit Tests
+        path: target/surefire-reports/*.xml
+        reporter: java-junit
+        fail-on-error: true
+
+  verify-pact:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.pact_url != ''
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Verify Pact Contract
+      env:
+        PACT_BROKER_URL: ${{ secrets.PACT_BROKER_URL }}
+        PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+        PACT_URL: ${{ github.event.inputs.pact_url }}
+        CONSUMER_VERSION_TAGS: ${{ github.event.inputs.consumer_version_tags }}
+        CONSUMER_VERSION_NUMBER: ${{ github.event.inputs.consumer_version_number }}
+        PROVIDER_VERSION_TAGS: ${{ github.event.inputs.provider_version_tags }}
+      run: ./mvnw test -Dtest=PactProviderVerificationTest
+    
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Pact Verification Tests
         path: target/surefire-reports/*.xml
         reporter: java-junit
         fail-on-error: true 
