@@ -43,10 +43,10 @@ class PactProviderVerificationTest {
     fun setUp(context: PactVerificationContext) {
         context.target = HttpTestTarget.fromUrl(URI.create("http://localhost:$port").toURL())
         
-        // Configure publishing results (only publish in CI/CD, not locally)
-        val publishResults = System.getenv("CI")?.let { "true" } ?: System.getProperty("pact.verifier.publishResults", "false")
-        System.setProperty("pact.verifier.publishResults", publishResults)
-        
+        // Configure publishing results and provider metadata
+        System.setProperty("pact.verifier.publishResults", System.getenv("CI") ?: "false")
+        System.setProperty("pact.provider.version", System.getenv("GITHUB_SHA") ?: "unknown")
+        System.setProperty("pact.provider.branch", System.getenv("GITHUB_BRANCH") ?: "unknown")
     }
 
     @TestTemplate

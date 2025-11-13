@@ -43,6 +43,9 @@ jobs:
         cache: maven
     
     - name: Build with Maven
+      env:
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_BRANCH: ${{ github.ref_name }}
       run: ./mvnw clean verify -Dpactbroker.url=${{ secrets.PACT_BROKER_URL }} -Dpactbroker.auth.token=${{ secrets.PACT_BROKER_TOKEN }}
     
     - name: Test Report
@@ -69,6 +72,9 @@ jobs:
         cache: maven
     
     - name: Verify Pact Contract
+      env:
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_BRANCH: ${{ github.ref_name }}
       run: ./mvnw test -Dtest=PactProviderVerificationTest -Dpactbroker.url=${{ secrets.PACT_BROKER_URL }} -Dpactbroker.auth.token=${{ secrets.PACT_BROKER_TOKEN }} -Dpact.url=${{ github.event.inputs.pact_url }} -Dconsumer.version.tags=${{ github.event.inputs.consumer_version_tags }} -Dconsumer.version.number=${{ github.event.inputs.consumer_version_number }} -Dprovider.version.tags=${{ github.event.inputs.provider_version_tags }}
     
     - name: Test Report
