@@ -5,6 +5,24 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      pact_url:
+        description: 'URL of the pact to verify (optional)'
+        required: false
+        default: ''
+      consumer_version_tags:
+        description: 'Consumer version tags (optional)'
+        required: false
+        default: ''
+      consumer_version_number:
+        description: 'Consumer version number (optional)'
+        required: false
+        default: ''
+      provider_version_tags:
+        description: 'Provider version tags (optional)'
+        required: false
+        default: ''
 
 permissions:
   checks: write
@@ -25,13 +43,45 @@ jobs:
         cache: maven
     
     - name: Build with Maven
-      run: ./mvnw clean verify
+      env:
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_BRANCH: ${{ github.ref_name }}
+      run: ./mvnw clean verify -Dpactbroker.url=${{ secrets.PACT_BROKER_URL }} -Dpactbroker.auth.token=${{ secrets.PACT_BROKER_TOKEN }}
     
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: success() || failure()
       with:
         name: JUnit Tests
+        path: target/surefire-reports/*.xml
+        reporter: java-junit
+        fail-on-error: true
+
+  verify-pact:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.pact_url != ''
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Verify Pact Contract
+      env:
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_BRANCH: ${{ github.ref_name }}
+      run: ./mvnw test -Dtest=PactProviderVerificationTest -Dpactbroker.url=${{ secrets.PACT_BROKER_URL }} -Dpactbroker.auth.token=${{ secrets.PACT_BROKER_TOKEN }} -Dpact.url=${{ github.event.inputs.pact_url }} -Dconsumer.version.tags=${{ github.event.inputs.consumer_version_tags }} -Dconsumer.version.number=${{ github.event.inputs.consumer_version_number }} -Dprovider.version.tags=${{ github.event.inputs.provider_version_tags }}
+    
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Pact Verification Tests
         path: target/surefire-reports/*.xml
         reporter: java-junit
         fail-on-error: true 

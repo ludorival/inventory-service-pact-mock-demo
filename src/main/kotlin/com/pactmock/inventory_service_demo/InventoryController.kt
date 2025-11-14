@@ -19,10 +19,10 @@ class InventoryController(private val itemRepository: ItemRepository) {
         val item = itemRepository.findById(request.itemId)
         return when {
             item == null -> ResponseEntity.notFound().build()
-            item.stockCount < request.quantity -> ResponseEntity.status(409).body(BookingResponse(false, "Insufficient stock"))
+            item.stockCount < request.quantity -> ResponseEntity.ok(BookingResponse(false, "Out of stock"))
             else -> {
                 itemRepository.updateStock(request.itemId, item.stockCount - request.quantity)
-                ResponseEntity.ok(BookingResponse(true, "Successfully booked ${request.quantity} items"))
+                ResponseEntity.ok(BookingResponse(true, "Booked successfully"))
             }
         }
     }
@@ -34,7 +34,7 @@ class InventoryController(private val itemRepository: ItemRepository) {
             item == null -> ResponseEntity.notFound().build()
             else -> {
                 itemRepository.updateStock(request.itemId, item.stockCount + request.quantity)
-                ResponseEntity.ok(ReleaseResponse(true, "Successfully released ${request.quantity} items"))
+                ResponseEntity.ok(ReleaseResponse(true, "Released successfully"))
             }
         }
     }

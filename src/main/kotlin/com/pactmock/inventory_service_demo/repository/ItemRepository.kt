@@ -5,4 +5,6 @@ interface ItemRepository {
     fun findAll(): List<Item>
     fun findById(id: Long): Item?
     fun updateStock(id: Long, quantity: Int): Boolean
+    fun save(item: Item): Item
+    fun clear()
 } 
